@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Lineare Abbildung in ℝ²</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #fefdf8;
+  --bg-secondary: #f7f5ed;
+  --fg-primary: #1a1614;
+  --fg-secondary: #5a5450;
+  --canvas-bg: #ffffff;
+  --grid: #e8e4db;
+  --accent-primary: #d97706;
+  --accent-secondary: #059669;
+  --accent-tertiary: #0891b2;
+  --border: #d4cfc4;
+  --shadow: rgba(26, 22, 20, 0.08);
+  --glow: rgba(217, 119, 6, 0.15);
+}
+
+.dark {
+  --bg-primary: #0f0e0d;
+  --bg-secondary: #1a1816;
+  --fg-primary: #faf8f3;
+  --fg-secondary: #a39d95;
+  --canvas-bg: #1a1816;
+  --grid: #2d2a26;
+  --accent-primary: #fb923c;
+  --accent-secondary: #34d399;
+  --accent-tertiary: #22d3ee;
+  --border: #3d3934;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --glow: rgba(251, 146, 60, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  font-family: 'Fraunces', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--fg-secondary);
+  font-weight: 300;
+  font-style: italic;
+}
+
+.main-content {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr 400px;
+  }
+}
+
+.canvas-section {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid var(--border);
+}
+
+canvas {
+  background: var(--canvas-bg);
+  border-radius: 0.75rem;
+  border: 2px solid var(--border);
+  touch-action: none;
+  width: 100%;
+  height: auto;
+  display: block;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--fg-primary);
+  letter-spacing: -0.01em;
+}
+
+.matrix-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2rem;
+  color: var(--accent-primary);
+  margin-bottom: 1rem;
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.bracket {
+  font-size: 4rem;
+  font-weight: 300;
+  color: var(--fg-secondary);
+}
+
+.matrix input {
+  width: 70px;
+  height: 50px;
+  font-size: 1.25rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: center;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--canvas-bg);
+  color: var(--fg-primary);
+  font-weight: 500;
+}
+
+.matrix input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.vector-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.vector-label {
+  font-weight: 600;
+  color: var(--fg-primary);
+}
+
+.vector-input input {
+  width: 60px;
+  height: 40px;
+  font-size: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: center;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--canvas-bg);
+  color: var(--fg-primary);
+}
+
+.vector-input input:focus {
+  outline: none;
+  border-color: var(--accent-tertiary);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+button {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--canvas-bg);
+  color: var(--fg-primary);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent-primary);
+}
+
+button:active {
+  background: var(--bg-secondary);
+}
+
+.toggle-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--canvas-bg);
+  border: 1px solid var(--border);
+}
+
+.toggle-item input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.toggle-item input[type="checkbox"]:checked {
+  background: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+}
+
+.toggle-item input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.toggle-item label {
+  cursor: pointer;
+  font-weight: 500;
+  user-select: none;
+}
+
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--fg-secondary);
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.info-display {
+  background: var(--canvas-bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--accent-tertiary);
+  font-weight: 500;
+  box-shadow: inset 0 2px 4px var(--shadow);
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legend-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+.legend-text {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--fg-secondary);
+}
+
+@media (max-width: 1023px) {
+  .control-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+  
+  .matrix-container {
+    font-size: 1.5rem;
+  }
+  
+  .bracket {
+    font-size: 3rem;
+  }
+  
+  .matrix input {
+    width: 60px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <header>
+    <h1>Lineare Abbildung in ℝ²</h1>
+    <p class="subtitle">Interaktive Visualisierung von Matrixtransformationen</p>
+  </header>
+
+  <div class="main-content">
+    <!-- Canvas Section -->
+    <div class="canvas-section">
+      <canvas id="canvas" width="800" height="800"></canvas>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      
+      <!-- Matrix Input Card -->
+      <div class="card">
+        <h2 class="card-title">Transformationsmatrix A</h2>
+        <div class="matrix-container">
+          <div class="bracket">[</div>
+          <div class="matrix">
+            <input id="a11" value="1" type="number" step="0.1">
+            <input id="a12" value="0" type="number" step="0.1">
+            <input id="a21" value="0" type="number" step="0.1">
+            <input id="a22" value="1" type="number" step="0.1">
+          </div>
+          <div class="bracket">]</div>
+        </div>
+      </div>
+
+      <!-- Vector Input Card -->
+      <div class="card">
+        <h2 class="card-title">Testvektor</h2>
+        <div class="vector-input">
+          <span class="vector-label">v =</span>
+          <span>(</span>
+          <input id="vx" value="2" type="number" step="0.1">
+          <span>,</span>
+          <input id="vy" value="1" type="number" step="0.1">
+          <span>)</span>
+        </div>
+      </div>
+
+      <!-- Animation Controls Card -->
+      <div class="card">
+        <h2 class="card-title">Animation</h2>
+        <div class="button-group">
+          <button onclick="startAnimation()">▶ Start</button>
+          <button onclick="pause()">⏸ Pause</button>
+          <button onclick="resetAll()">🔄 Reset</button>
+        </div>
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Fortschritt</span>
+            <span id="tValue">0%</span>
+          </div>
+          <input type="range" id="scrubber" min="0" max="100" value="0">
+        </div>
+      </div>
+
+      <!-- Display Options Card -->
+      <div class="card">
+        <h2 class="card-title">Anzeigeoptionen</h2>
+        <div class="toggle-group">
+          <div class="toggle-item">
+            <input type="checkbox" id="showAxes" checked>
+            <label for="showAxes">Achsen</label>
+          </div>
+          <div class="toggle-item">
+            <input type="checkbox" id="showTestVector" checked>
+            <label for="showTestVector">Testvektor</label>
+          </div>
+          <div class="toggle-item">
+            <input type="checkbox" id="darkToggle">
+            <label for="darkToggle">Dark Mode</label>
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #3b82f6;"></div>
+            <span class="legend-text">Basisvektor e₁</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #10b981;"></div>
+            <span class="legend-text">Basisvektor e₂</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #0891b2;"></div>
+            <span class="legend-text">Testvektor v</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Display Card -->
+      <div class="card">
+        <h2 class="card-title">Ergebnis</h2>
+        <div class="info-display" id="vectorInfo">A(v) = (0.00, 0.00)</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const scale = 40;
+const center = canvas.width / 2;
+const gridSize = 10;
+
+let t = 0;
+let running = false;
+let animationId = null;
+
+// Theme toggle
+darkToggle.onchange = e => {
+  document.body.classList.toggle("dark", e.target.checked);
+};
+
+// Scrubber
+scrubber.oninput = e => {
+  t = e.target.value / 100;
+  tValue.textContent = Math.round(t * 100) + '%';
+  draw();
+};
+
+// All inputs trigger redraw
+[a11, a12, a21, a22, vx, vy, showAxes, showTestVector].forEach(el => {
+  el.addEventListener('input', draw);
+  el.addEventListener('change', draw);
+});
+
+function transform(M, v) {
+  return [
+    M[0][0]*v[0] + M[0][1]*v[1],
+    M[1][0]*v[0] + M[1][1]*v[1]
+  ];
+}
+
+function arrow(x1, y1, x2, y2, color, width) {
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  
+  const angle = Math.atan2(y2-y1, x2-x1);
+  const headLength = 15;
+  
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(
+    x2 - headLength * Math.cos(angle - Math.PI/6),
+    y2 - headLength * Math.sin(angle - Math.PI/6)
+  );
+  ctx.lineTo(
+    x2 - headLength * Math.cos(angle + Math.PI/6),
+    y2 - headLength * Math.sin(angle + Math.PI/6)
+  );
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawGrid(M) {
+  const style = getComputedStyle(document.body);
+  const gridColor = style.getPropertyValue('--grid').trim();
+  
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  
+  for(let i = -gridSize; i <= gridSize; i++) {
+    drawLine(M, [i, -gridSize], [i, gridSize]);
+    drawLine(M, [-gridSize, i], [gridSize, i]);
+  }
+}
+
+function drawLine(M, p1, p2) {
+  const a = transform(M, p1);
+  const b = transform(M, p2);
+  ctx.beginPath();
+  ctx.moveTo(center + a[0]*scale, center - a[1]*scale);
+  ctx.lineTo(center + b[0]*scale, center - b[1]*scale);
+  ctx.stroke();
+}
+
+function drawAxes() {
+  const style = getComputedStyle(document.body);
+  const axisColor = style.getPropertyValue('--fg-secondary').trim();
+  
+  ctx.strokeStyle = axisColor;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 5]);
+  
+  // X-axis
+  ctx.beginPath();
+  ctx.moveTo(0, center);
+  ctx.lineTo(canvas.width, center);
+  ctx.stroke();
+  
+  // Y-axis
+  ctx.beginPath();
+  ctx.moveTo(center, 0);
+  ctx.lineTo(center, canvas.height);
+  ctx.stroke();
+  
+  ctx.setLineDash([]);
+  
+  // Labels
+  ctx.fillStyle = axisColor;
+  ctx.font = "12px 'IBM Plex Mono', monospace";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  for(let i = -gridSize; i <= gridSize; i++) {
+    if(i === 0) continue;
+    ctx.fillText(i, center + i*scale, center + 20);
+    ctx.fillText(i, center - 20, center - i*scale);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const A = [
+    [+a11.value, +a12.value],
+    [+a21.value, +a22.value]
+  ];
+
+  const M = [
+    [1 + t*(A[0][0]-1), t*A[0][1]],
+    [t*A[1][0], 1 + t*(A[1][1]-1)]
+  ];
+
+  if(showAxes.checked) drawAxes();
+  drawGrid(M);
+
+  // Basis vectors
+  const e1 = transform(M, [1, 0]);
+  const e2 = transform(M, [0, 1]);
+  
+  arrow(center, center, 
+        center + e1[0]*scale, center - e1[1]*scale, 
+        "#3b82f6", 3);
+  arrow(center, center, 
+        center + e2[0]*scale, center - e2[1]*scale, 
+        "#10b981", 3);
+
+  // Test vector - only if checkbox is checked
+  if(showTestVector.checked) {
+    const v = [+vx.value, +vy.value];
+    const vImg = transform(M, v);
+
+    arrow(center, center,
+          center + vImg[0]*scale,
+          center - vImg[1]*scale,
+          "#0891b2", 4);
+
+    vectorInfo.textContent = 
+      `A(v) = (${vImg[0].toFixed(2)}, ${vImg[1].toFixed(2)})`;
+  } else {
+    vectorInfo.textContent = 'Testvektor ausgeblendet';
+  }
+}
+
+function loop() {
+  if(!running) return;
+  t = Math.min(t + 0.01, 1);
+  scrubber.value = t * 100;
+  tValue.textContent = Math.round(t * 100) + '%';
+  draw();
+  if(t < 1) {
+    animationId = requestAnimationFrame(loop);
+  } else {
+    running = false;
+    animationId = null;
+  }
+}
+
+function startAnimation() {
+  if(animationId) {
+    cancelAnimationFrame(animationId);
+  }
+  running = false;
+  t = 0;
+  scrubber.value = 0;
+  tValue.textContent = '0%';
+  running = true;
+  loop();
+}
+
+function pause() { 
+  running = false;
+  if(animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+}
+
+function resetAll() {
+  running = false;
+  if(animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+  t = 0;
+  scrubber.value = 0;
+  tValue.textContent = '0%';
+  a11.value = 1;
+  a12.value = 0;
+  a21.value = 0;
+  a22.value = 1;
+  vx.value = 2;
+  vy.value = 1;
+  draw();
+}
+
+// Initial draw
+draw();
+</script>
+
+</body>
+</html>
