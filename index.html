@@ -362,10 +362,6 @@ footer {
 </style>
 </head>
 
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
 <body>
 
 <!-- Theme Toggle -->
@@ -543,8 +539,7 @@ function renderHeaderLinks() {
   const links = [
     { icon: '📂', text: 'GitHub', url: CONFIG.personal.github },
     { icon: '✉️', text: 'E-Mail', url: `mailto:${CONFIG.personal.email}` },
-    { icon: <i class="fa-brands fa-instagram"></i>
-, text: 'Instagram', url: CONFIG.personal.instagram }
+    { icon: '💼', text: 'Instagram', url: CONFIG.personal.instagram }
   ];
   
   links.forEach(link => {
