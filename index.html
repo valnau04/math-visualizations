@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Interaktive mathematische Visualisierungen und Tools von Valentin Nau">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
@@ -539,7 +541,7 @@ function renderHeaderLinks() {
   const links = [
     { icon: '📂', text: 'GitHub', url: CONFIG.personal.github },
     { icon: '✉️', text: 'E-Mail', url: `mailto:${CONFIG.personal.email}` },
-    { icon: '💼', text: 'Instagram', url: CONFIG.personal.instagram }
+    { icon: '<i class="fa-brands fa-instagram"></i>', text: 'Instagram', url: CONFIG.personal.instagram }
   ];
   
   links.forEach(link => {
