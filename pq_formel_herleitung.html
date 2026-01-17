@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Interaktive Herleitung der pq-Formel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #fefdf8;
+  --bg-secondary: #f7f5ed;
+  --fg-primary: #1a1614;
+  --fg-secondary: #5a5450;
+  --canvas-bg: #ffffff;
+  --accent-primary: #d97706;
+  --accent-secondary: #059669;
+  --accent-tertiary: #0891b2;
+  --accent-error: #dc2626;
+  --border: #d4cfc4;
+  --shadow: rgba(26, 22, 20, 0.08);
+  --success: #10b981;
+}
+
+.dark {
+  --bg-primary: #0f0e0d;
+  --bg-secondary: #1a1816;
+  --fg-primary: #faf8f3;
+  --fg-secondary: #a39d95;
+  --canvas-bg: #1a1816;
+  --accent-primary: #fb923c;
+  --accent-secondary: #34d399;
+  --accent-tertiary: #22d3ee;
+  --accent-error: #ef4444;
+  --border: #3d3934;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --success: #34d399;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--fg-primary);
+  font-family: 'Fraunces', serif;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--fg-secondary);
+  font-weight: 300;
+  font-style: italic;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+}
+
+.theme-toggle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--accent-primary);
+}
+
+.progress-bar {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--fg-secondary);
+}
+
+.progress-track {
+  height: 12px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.card {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.step-number {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fg-primary);
+}
+
+.equation-box {
+  background: var(--canvas-bg);
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.3rem;
+  box-shadow: inset 0 2px 4px var(--shadow);
+}
+
+.explanation {
+  background: var(--canvas-bg);
+  border-left: 4px solid var(--accent-tertiary);
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--fg-secondary);
+}
+
+.question {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--fg-primary);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.choice {
+  background: var(--canvas-bg);
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.choice:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-primary);
+  transform: translateX(5px);
+}
+
+.choice.selected {
+  border-color: var(--accent-tertiary);
+  background: var(--bg-primary);
+}
+
+.choice.correct {
+  border-color: var(--success);
+  background: var(--bg-primary);
+}
+
+.choice.wrong {
+  border-color: var(--accent-error);
+  background: var(--bg-primary);
+  opacity: 0.6;
+}
+
+.choice-letter {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.choice.selected .choice-letter {
+  background: var(--accent-tertiary);
+  color: white;
+}
+
+.choice.correct .choice-letter {
+  background: var(--success);
+  color: white;
+}
+
+.choice.wrong .choice-letter {
+  background: var(--accent-error);
+  color: white;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.feedback.correct {
+  background: var(--success);
+  color: white;
+  border: 2px solid var(--success);
+}
+
+.feedback.wrong {
+  background: var(--accent-error);
+  color: white;
+  border: 2px solid var(--accent-error);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--canvas-bg);
+  color: var(--fg-primary);
+  cursor: pointer;
+  flex: 1;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border: none;
+}
+
+button.primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.completion-card {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.completion-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.completion-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--fg-primary);
+}
+
+.completion-text {
+  font-size: 1.1rem;
+  color: var(--fg-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.final-formula {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 1rem 0.5rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .equation-box {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+  
+  .choice {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="theme-toggle">
+  <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle Theme">
+    <span id="themeIcon">🌙</span>
+  </button>
+</div>
+
+<div class="container">
+  <header>
+    <h1>Interaktive Herleitung der pq-Formel</h1>
+    <p class="subtitle">Lerne Schritt für Schritt, wie die pq-Formel entsteht</p>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-info">
+      <span>Fortschritt</span>
+      <span id="progressText">0 / 6</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+const steps = [
+  {
+    title: "Ausgangssituation",
+    equation: "x² + px + q = 0",
+    explanation: "Wir starten mit der Normalform einer quadratischen Gleichung. Unser Ziel ist es, diese Gleichung nach x aufzulösen.",
+    question: "Was ist unser erster Schritt, um diese Gleichung zu lösen?",
+    choices: [
+      { text: "q von beiden Seiten subtrahieren", correct: false },
+      { text: "Quadratische Ergänzung durchführen", correct: true },
+      { text: "Die Wurzel ziehen", correct: false },
+      { text: "p durch 2 teilen", correct: false }
+    ],
+    feedback: {
+      correct: "Richtig! Die quadratische Ergänzung ist der Schlüssel zur Herleitung der pq-Formel.",
+      wrong: "Nicht ganz. Die quadratische Ergänzung ist hier der richtige erste Schritt!"
+    }
+  },
+  {
+    title: "Vorbereitung der quadratischen Ergänzung",
+    equation: "x² + px = -q",
+    explanation: "Wir bringen q auf die rechte Seite, damit wir links die quadratische Ergänzung durchführen können.",
+    question: "Welchen Term müssen wir auf beiden Seiten addieren, um links ein vollständiges Quadrat zu erhalten?",
+    choices: [
+      { text: "(p/2)²", correct: true },
+      { text: "p²", correct: false },
+      { text: "p/4", correct: false },
+      { text: "2p", correct: false }
+    ],
+    feedback: {
+      correct: "Perfekt! Für die quadratische Ergänzung addieren wir (p/2)² auf beiden Seiten.",
+      wrong: "Fast! Bei der quadratischen Ergänzung nehmen wir die Hälfte von p und quadrieren: (p/2)²"
+    }
+  },
+  {
+    title: "Durchführung der quadratischen Ergänzung",
+    equation: "x² + px + (p/2)² = -q + (p/2)²",
+    explanation: "Wir haben (p/2)² auf beiden Seiten addiert. Jetzt können wir die linke Seite als Binom schreiben.",
+    question: "Wie lautet die linke Seite als Binom?",
+    choices: [
+      { text: "(x + p)²", correct: false },
+      { text: "(x + p/2)²", correct: true },
+      { text: "(x - p/2)²", correct: false },
+      { text: "(x + 2p)²", correct: false }
+    ],
+    feedback: {
+      correct: "Genau! Die linke Seite lässt sich als (x + p/2)² schreiben.",
+      wrong: "Nicht ganz. Erinnere dich an die binomische Formel: (a + b)² = a² + 2ab + b²"
+    }
+  },
+  {
+    title: "Binomische Formel anwenden",
+    equation: "(x + p/2)² = -q + (p/2)²",
+    explanation: "Jetzt haben wir auf der linken Seite ein perfektes Quadrat. Die rechte Seite können wir vereinfachen.",
+    question: "Was können wir zusammenfassen auf der rechten Seite?",
+    choices: [
+      { text: "(p/2)² - q", correct: true },
+      { text: "q - (p/2)²", correct: false },
+      { text: "p² - 4q", correct: false },
+      { text: "-q + p²", correct: false }
+    ],
+    feedback: {
+      correct: "Richtig! Wir schreiben die Terme in der üblichen Reihenfolge: (p/2)² - q",
+      wrong: "Fast! Die Reihenfolge ist wichtig: (p/2)² - q"
+    }
+  },
+  {
+    title: "Wurzel ziehen",
+    equation: "(x + p/2)² = (p/2)² - q",
+    explanation: "Um das Quadrat aufzulösen, ziehen wir auf beiden Seiten die Wurzel. Dabei müssen wir ± beachten!",
+    question: "Was erhalten wir nach dem Wurzelziehen?",
+    choices: [
+      { text: "x + p/2 = √((p/2)² - q)", correct: false },
+      { text: "x + p/2 = ±√((p/2)² - q)", correct: true },
+      { text: "x = ±√((p/2)² - q)", correct: false },
+      { text: "x - p/2 = ±√((p/2)² - q)", correct: false }
+    ],
+    feedback: {
+      correct: "Super! Beim Wurzelziehen müssen wir immer das ± beachten, da sowohl positive als auch negative Wurzeln möglich sind.",
+      wrong: "Achtung! Beim Wurzelziehen aus einem Quadrat müssen wir ± berücksichtigen."
+    }
+  },
+  {
+    title: "Nach x auflösen",
+    equation: "x + p/2 = ±√((p/2)² - q)",
+    explanation: "Jetzt müssen wir nur noch nach x auflösen, indem wir p/2 auf beiden Seiten subtrahieren.",
+    question: "Wie lautet die finale pq-Formel?",
+    choices: [
+      { text: "x = p/2 ± √((p/2)² - q)", correct: false },
+      { text: "x = -p/2 ± √((p/2)² - q)", correct: true },
+      { text: "x = ±√((p/2)² - q) + p/2", correct: false },
+      { text: "x = -p/2 ± √(p² - q)", correct: false }
+    ],
+    feedback: {
+      correct: "Perfekt! Du hast die pq-Formel erfolgreich hergeleitet: x = -p/2 ± √((p/2)² - q)",
+      wrong: "Fast! Denk daran, dass wir p/2 subtrahieren müssen, also -p/2."
+    }
+  }
+];
+
+let currentStep = 0;
+let selectedChoice = null;
+let answered = false;
+
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+let isDark = false;
+
+themeToggle.addEventListener('click', () => {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
+
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme === 'dark') {
+  isDark = true;
+  document.body.classList.add('dark');
+  themeIcon.textContent = '☀️';
+}
+
+function updateProgress() {
+  const progress = (currentStep / steps.length) * 100;
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('progressText').textContent = `${currentStep} / ${steps.length}`;
+}
+
+function renderStep() {
+  const content = document.getElementById('content');
+  const step = steps[currentStep];
+  
+  content.innerHTML = `
+    <div class="card">
+      <div class="step-header">
+        <div class="step-number">${currentStep + 1}</div>
+        <h2 class="step-title">${step.title}</h2>
+      </div>
+      
+      <div class="equation-box">${step.equation}</div>
+      
+      <div class="explanation">${step.explanation}</div>
+      
+      <div class="question">${step.question}</div>
+      
+      <div class="choices" id="choices"></div>
+      
+      <div id="feedback"></div>
+      
+      <div class="button-group">
+        <button onclick="checkAnswer()" id="checkBtn" disabled>Antwort prüfen</button>
+        <button onclick="nextStep()" id="nextBtn" disabled class="primary">Weiter</button>
+      </div>
+    </div>
+  `;
+  
+  renderChoices();
+  updateProgress();
+}
+
+function renderChoices() {
+  const choicesDiv = document.getElementById('choices');
+  const step = steps[currentStep];
+  const letters = ['A', 'B', 'C', 'D'];
+  
+  choicesDiv.innerHTML = '';
+  step.choices.forEach((choice, index) => {
+    const choiceDiv = document.createElement('div');
+    choiceDiv.className = 'choice';
+    choiceDiv.innerHTML = `
+      <div class="choice-letter">${letters[index]}</div>
+      <div>${choice.text}</div>
+    `;
+    choiceDiv.onclick = () => selectChoice(index);
+    choicesDiv.appendChild(choiceDiv);
+  });
+}
+
+function selectChoice(index) {
+  if(answered) return;
+  
+  selectedChoice = index;
+  
+  const choices = document.querySelectorAll('.choice');
+  choices.forEach((choice, i) => {
+    choice.classList.toggle('selected', i === index);
+  });
+  
+  document.getElementById('checkBtn').disabled = false;
+}
+
+function checkAnswer() {
+  if(selectedChoice === null || answered) return;
+  
+  answered = true;
+  const step = steps[currentStep];
+  const isCorrect = step.choices[selectedChoice].correct;
+  
+  const choices = document.querySelectorAll('.choice');
+  choices.forEach((choice, i) => {
+    choice.onclick = null;
+    if(step.choices[i].correct) {
+      choice.classList.add('correct');
+    } else if(i === selectedChoice && !isCorrect) {
+      choice.classList.add('wrong');
+    }
+  });
+  
+  const feedbackDiv = document.getElementById('feedback');
+  feedbackDiv.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  feedbackDiv.textContent = isCorrect ? step.feedback.correct : step.feedback.wrong;
+  
+  document.getElementById('checkBtn').disabled = true;
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextStep() {
+  currentStep++;
+  selectedChoice = null;
+  answered = false;
+  
+  if(currentStep < steps.length) {
+    renderStep();
+  } else {
+    showCompletion();
+  }
+}
+
+function showCompletion() {
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="card completion-card">
+      <div class="completion-icon">🎉</div>
+      <h2 class="completion-title">Herzlichen Glückwunsch!</h2>
+      <p class="completion-text">
+        Du hast die pq-Formel erfolgreich hergeleitet! Du verstehst nun, wie aus der 
+        Normalform einer quadratischen Gleichung die Lösungsformel entsteht.
+      </p>
+      
+      <div class="final-formula">
+        x = -p/2 ± √((p/2)² - q)
+      </div>
+      
+      <p class="completion-text">
+        Mit dieser Formel kannst du jede quadratische Gleichung der Form x² + px + q = 0 lösen!
+      </p>
+      
+      <div class="button-group">
+        <button onclick="restart()" class="primary">Nochmal von vorne</button>
+        <button onclick="window.location.href='index.html'">Zurück zur Übersicht</button>
+      </div>
+    </div>
+  `;
+  
+  updateProgress();
+}
+
+function restart() {
+  currentStep = 0;
+  selectedChoice = null;
+  answered = false;
+  renderStep();
+}
+
+// Initialize
+renderStep();
+</script>
+
+</body>
+</html>
