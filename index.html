@@ -374,60 +374,24 @@ footer {
 <div class="container">
   <!-- Header -->
   <header>
-    <div class="logo">VN</div>
-    <h1>Valentin Nau</h1>
-    <p class="subtitle">Mathematik · Visualisierung · Interaktive Tools</p>
-    <div class="header-links">
-      <a href="https://github.com/valentinnau" class="header-link" target="_blank">
-        <span>📂</span> GitHub
-      </a>
-      <a href="mailto:valentin.nau@example.com" class="header-link">
-        <span>✉️</span> E-Mail
-      </a>
-      <a href="https://linkedin.com/in/valentinnau" class="header-link" target="_blank">
-        <span>💼</span> LinkedIn
-      </a>
-    </div>
+    <div class="logo" id="logo"></div>
+    <h1 id="name"></h1>
+    <p class="subtitle" id="tagline"></p>
+    <div class="header-links" id="headerLinks"></div>
   </header>
 
   <!-- Projects Section -->
   <section class="section">
     <h2 class="section-title">Projekte & Visualisierungen</h2>
-    <p class="section-description">
-      Interaktive Tools zur Visualisierung mathematischer Konzepte. 
-      Entwickelt für Lernende, Lehrende und alle, die Mathematik besser verstehen möchten.
-    </p>
+    <p class="section-description" id="projectsDescription"></p>
     
-    <div class="project-grid" id="projectGrid">
-      <!-- Projects will be dynamically inserted here -->
-    </div>
+    <div class="project-grid" id="projectGrid"></div>
   </section>
 
   <!-- Features Section -->
   <section class="section">
     <h2 class="section-title">Features</h2>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🎨</div>
-        <h3 class="feature-title">Interaktiv</h3>
-        <p class="feature-text">Erlebe Mathematik in Echtzeit mit responsiven Visualisierungen</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📱</div>
-        <h3 class="feature-title">Responsive</h3>
-        <p class="feature-text">Optimiert für Desktop, Tablet und Mobile</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🌓</div>
-        <h3 class="feature-title">Dark Mode</h3>
-        <p class="feature-text">Augenschonendes Arbeiten zu jeder Tageszeit</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3 class="feature-title">Performant</h3>
-        <p class="feature-text">Optimiert für flüssige Performance auf allen Geräten</p>
-      </div>
-    </div>
+    <div class="feature-grid" id="featureGrid"></div>
   </section>
 
   <!-- Contact Section -->
@@ -437,24 +401,12 @@ footer {
       <p class="section-description" style="margin: 0 auto 1rem;">
         Hast du Fragen, Feedback oder Ideen für neue Visualisierungen? Ich freue mich von dir zu hören!
       </p>
-      <div class="contact-links">
-        <a href="mailto:valentin.nau@example.com" class="contact-link">
-          <span>✉️</span> E-Mail senden
-        </a>
-        <a href="https://github.com/valentinnau" class="contact-link" target="_blank">
-          <span>📂</span> GitHub Issues
-        </a>
-      </div>
+      <div class="contact-links" id="contactLinks"></div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Valentin Nau · Alle Rechte vorbehalten</p>
-    <p style="margin-top: 0.5rem; font-size: 0.85rem;">
-      Erstellt mit ❤️ und viel Kaffee ☕
-    </p>
-  </footer>
+  <footer id="footer"></footer>
 </div>
 
 <script>
@@ -465,12 +417,12 @@ footer {
 const CONFIG = {
   // Personal Information
   personal: {
-    name: "Valentin Gau",
-    initials: "VG",
-    tagline: "Mathematik · Visualisierung · Interaktive Tools · Bier",
+    name: "Valentin Nau",
+    initials: "VN",
+    tagline: "Mathematik · Visualisierung · Interaktive Tools",
     description: "Interaktive Tools zur Visualisierung mathematischer Konzepte. Entwickelt für Lernende, Lehrende und alle, die Mathematik besser verstehen möchten.",
-    email: "val04nau@gmail.com",
-    github: "https://github.com/valnau04",
+    email: "valentin.nau@example.com",
+    github: "https://github.com/valentinnau",
     linkedin: "https://linkedin.com/in/valentinnau"
   },
   
@@ -544,29 +496,54 @@ const CONFIG = {
 // APPLICATION CODE - No need to edit below unless you want to customize behavior
 // ============================================================================
 
-// Theme Toggle
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
-let isDark = CONFIG.theme.defaultDark;
-
-if(isDark) {
-  document.body.classList.add('dark');
-  themeIcon.textContent = '☀️';
+// Initialize page with CONFIG data
+function initializePage() {
+  // Set personal info
+  document.getElementById('logo').textContent = CONFIG.personal.initials;
+  document.getElementById('name').textContent = CONFIG.personal.name;
+  document.getElementById('tagline').textContent = CONFIG.personal.tagline;
+  document.getElementById('projectsDescription').textContent = CONFIG.personal.description;
+  
+  // Set page title
+  document.title = `${CONFIG.personal.name} - Mathematik & Visualisierungen`;
+  
+  // Render header links
+  renderHeaderLinks();
+  
+  // Render projects
+  renderProjects();
+  
+  // Render features
+  renderFeatures();
+  
+  // Render contact links
+  renderContactLinks();
+  
+  // Render footer
+  renderFooter();
 }
 
-themeToggle.addEventListener('click', () => {
-  isDark = !isDark;
-  document.body.classList.toggle('dark', isDark);
-  themeIcon.textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
-
-// Load saved theme preference
-const savedTheme = localStorage.getItem('theme');
-if(savedTheme) {
-  isDark = savedTheme === 'dark';
-  document.body.classList.toggle('dark', isDark);
-  themeIcon.textContent = isDark ? '☀️' : '🌙';
+// Render header links
+function renderHeaderLinks() {
+  const headerLinks = document.getElementById('headerLinks');
+  headerLinks.innerHTML = '';
+  
+  const links = [
+    { icon: '📂', text: 'GitHub', url: CONFIG.personal.github },
+    { icon: '✉️', text: 'E-Mail', url: `mailto:${CONFIG.personal.email}` },
+    { icon: '💼', text: 'LinkedIn', url: CONFIG.personal.linkedin }
+  ];
+  
+  links.forEach(link => {
+    const a = document.createElement('a');
+    a.className = 'header-link';
+    a.href = link.url;
+    if(link.url.startsWith('http')) {
+      a.target = '_blank';
+    }
+    a.innerHTML = `<span>${link.icon}</span> ${link.text}`;
+    headerLinks.appendChild(a);
+  });
 }
 
 // Render Projects
@@ -611,8 +588,84 @@ function renderProjects() {
   });
 }
 
-// Initialize
-renderProjects();
+// Render Features
+function renderFeatures() {
+  const featureGrid = document.getElementById('featureGrid');
+  featureGrid.innerHTML = '';
+  
+  CONFIG.features.forEach(feature => {
+    const card = document.createElement('div');
+    card.className = 'feature-card';
+    card.innerHTML = `
+      <div class="feature-icon">${feature.icon}</div>
+      <h3 class="feature-title">${feature.title}</h3>
+      <p class="feature-text">${feature.description}</p>
+    `;
+    featureGrid.appendChild(card);
+  });
+}
+
+// Render Contact Links
+function renderContactLinks() {
+  const contactLinks = document.getElementById('contactLinks');
+  contactLinks.innerHTML = '';
+  
+  const links = [
+    { icon: '✉️', text: 'E-Mail senden', url: `mailto:${CONFIG.personal.email}` },
+    { icon: '📂', text: 'GitHub Issues', url: CONFIG.personal.github }
+  ];
+  
+  links.forEach(link => {
+    const a = document.createElement('a');
+    a.className = 'contact-link';
+    a.href = link.url;
+    if(link.url.startsWith('http')) {
+      a.target = '_blank';
+    }
+    a.innerHTML = `<span>${link.icon}</span> ${link.text}`;
+    contactLinks.appendChild(a);
+  });
+}
+
+// Render Footer
+function renderFooter() {
+  const footer = document.getElementById('footer');
+  const year = new Date().getFullYear();
+  footer.innerHTML = `
+    <p>&copy; ${year} ${CONFIG.personal.name} · Alle Rechte vorbehalten</p>
+    <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+      Erstellt mit ❤️ und viel Kaffee ☕
+    </p>
+  `;
+}
+
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+let isDark = CONFIG.theme.defaultDark;
+
+if(isDark) {
+  document.body.classList.add('dark');
+  themeIcon.textContent = '☀️';
+}
+
+themeToggle.addEventListener('click', () => {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+});
+
+// Load saved theme preference
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme) {
+  isDark = savedTheme === 'dark';
+  document.body.classList.toggle('dark', isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+}
+
+// Initialize page
+initializePage();
 </script>
 
 </body>
