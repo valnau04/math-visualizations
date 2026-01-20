@@ -484,6 +484,23 @@ input[type="range"]::-moz-range-thumb {
     <!-- Control Panel -->
     <div class="control-panel">
       
+       <!-- Animation Controls Card -->
+      <div class="card">
+        <h2 class="card-title">Animation</h2>
+        <div class="button-group">
+          <button onclick="startAnimation()">▶ Start</button>
+          <button onclick="pause()">⏸ Pause</button>
+          <button onclick="resetAll()">🔄 Reset</button>
+        </div>
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Fortschritt</span>
+            <span id="tValue">0%</span>
+          </div>
+          <input type="range" id="scrubber" min="0" max="100" value="0">
+        </div>
+      </div>
+
       <!-- Matrix Input Card -->
       <div class="card">
         <h2 class="card-title">Transformationsmatrix A</h2>
@@ -512,6 +529,7 @@ input[type="range"]::-moz-range-thumb {
         </div>
       </div>
 
+
       <!-- Vector Input Card -->
       <div class="card">
         <h2 class="card-title">Testvektor</h2>
@@ -525,22 +543,7 @@ input[type="range"]::-moz-range-thumb {
         </div>
       </div>
 
-      <!-- Animation Controls Card -->
-      <div class="card">
-        <h2 class="card-title">Animation</h2>
-        <div class="button-group">
-          <button onclick="startAnimation()">▶ Start</button>
-          <button onclick="pause()">⏸ Pause</button>
-          <button onclick="resetAll()">🔄 Reset</button>
-        </div>
-        <div class="slider-container">
-          <div class="slider-label">
-            <span>Fortschritt</span>
-            <span id="tValue">0%</span>
-          </div>
-          <input type="range" id="scrubber" min="0" max="100" value="0">
-        </div>
-      </div>
+     
 
       <!-- Display Options Card -->
       <div class="card">
