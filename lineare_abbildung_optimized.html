@@ -19,6 +19,7 @@
   --accent-primary: #d97706;
   --accent-secondary: #059669;
   --accent-tertiary: #0891b2;
+  --accent-purple: #9333ea;
   --border: #d4cfc4;
   --shadow: rgba(26, 22, 20, 0.08);
   --glow: rgba(217, 119, 6, 0.15);
@@ -38,6 +39,7 @@
   --accent-primary: #fb923c;
   --accent-secondary: #34d399;
   --accent-tertiary: #22d3ee;
+  --accent-purple: #a855f7;
   --border: #3d3934;
   --shadow: rgba(0, 0, 0, 0.3);
   --glow: rgba(251, 146, 60, 0.2);
@@ -154,6 +156,10 @@ canvas {
   font-size: 2rem;
   color: var(--accent-primary);
   margin-bottom: 1rem;
+}
+
+.matrix-container.matrix-b {
+  color: var(--accent-purple);
 }
 
 .matrix {
@@ -303,6 +309,21 @@ button:active {
   background: var(--bg-secondary);
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-tertiary));
+  color: white;
+  border: none;
+}
+
+button.secondary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
 .toggle-group {
   display: flex;
   gap: 1rem;
@@ -435,6 +456,44 @@ input[type="range"]::-moz-range-thumb {
   color: var(--fg-secondary);
 }
 
+.info-box {
+  background: var(--canvas-bg);
+  border-left: 4px solid var(--accent-tertiary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--fg-secondary);
+}
+
+.composition-formula {
+  background: var(--canvas-bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--accent-purple);
+  margin: 1rem 0;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  color: var(--fg-primary);
+}
+
+.phase-indicator {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.phase-indicator.phase-b {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-tertiary));
+}
+
 @media (max-width: 1023px) {
   .control-panel {
     grid-template-columns: 1fr;
@@ -484,17 +543,27 @@ input[type="range"]::-moz-range-thumb {
     <!-- Control Panel -->
     <div class="control-panel">
       
-       <!-- Animation Controls Card -->
+      <!-- Animation Controls Card -->
       <div class="card">
         <h2 class="card-title">Animation</h2>
+        
+        <div id="phaseIndicator" class="phase-indicator" style="display: none;">
+          Phase A: Transformation wird angewendet
+        </div>
+        
         <div class="button-group">
-          <button onclick="startAnimation()">▶ Start</button>
+          <button onclick="startAnimationA()" id="btnStartA">▶ Start A</button>
           <button onclick="pause()">⏸ Pause</button>
           <button onclick="resetAll()">🔄 Reset</button>
         </div>
+        
+        <div class="button-group" id="phaseBControls" style="display: none; margin-top: 0.75rem;">
+          <button onclick="startAnimationB()" id="btnStartB" class="secondary">▶ Start B</button>
+        </div>
+        
         <div class="slider-container">
           <div class="slider-label">
-            <span>Fortschritt</span>
+            <span id="sliderLabel">Fortschritt A</span>
             <span id="tValue">0%</span>
           </div>
           <input type="range" id="scrubber" min="0" max="100" value="0">
@@ -529,6 +598,41 @@ input[type="range"]::-moz-range-thumb {
         </div>
       </div>
 
+      <!-- Second Matrix Input Card -->
+      <div class="card">
+        <h2 class="card-title" style="color: var(--accent-purple);">Zweite Transformation B</h2>
+        
+        <div class="toggle-item" style="margin-bottom: 1rem;">
+          <input type="checkbox" id="enableMatrixB">
+          <label for="enableMatrixB">Zweite Matrix aktivieren</label>
+        </div>
+        
+        <div id="matrixBContent" style="display: none;">
+          <div class="matrix-container matrix-b">
+            <div class="bracket">[</div>
+            <div class="matrix">
+              <input id="b11" value="1" type="number" step="0.1" class="e1-col">
+              <input id="b12" value="0" type="number" step="0.1" class="e2-col">
+              <input id="b21" value="0" type="number" step="0.1" class="e1-col">
+              <input id="b22" value="1" type="number" step="0.1" class="e2-col">
+            </div>
+            <div class="bracket">]</div>
+          </div>
+          
+          <button class="secondary" onclick="loadInverse()" style="width: 100%; margin-bottom: 1rem;">
+            A⁻¹ → B laden
+          </button>
+          
+          <div class="composition-formula" id="compositionFormula">
+            B ∘ A: Erst A, dann B
+          </div>
+          
+          <div class="info-box">
+            <strong>Komposition:</strong> Erst wird A vollständig angewendet, dann kannst du B starten.
+            Mit A⁻¹ wird die Transformation rückgängig gemacht!
+          </div>
+        </div>
+      </div>
 
       <!-- Vector Input Card -->
       <div class="card">
@@ -542,8 +646,6 @@ input[type="range"]::-moz-range-thumb {
           <span>)</span>
         </div>
       </div>
-
-     
 
       <!-- Display Options Card -->
       <div class="card">
@@ -587,6 +689,8 @@ input[type="range"]::-moz-range-thumb {
         <h2 class="card-title">Informationen</h2>
         <div class="info-display" id="vectorInfo">A(v) = (0.00, 0.00)</div>
         <div class="info-display" id="detInfo" style="margin-top: 0.5rem;">det(A) = 0.00</div>
+        <div class="info-display" id="detInfoB" style="margin-top: 0.5rem; display: none;">det(B) = 0.00</div>
+        <div class="info-display" id="detInfoComposition" style="margin-top: 0.5rem; display: none;">det(B∘A) = 0.00</div>
       </div>
 
     </div>
@@ -601,9 +705,12 @@ const scale = 40;
 const center = canvas.width / 2;
 const gridSize = 10;
 
-let t = 0;
+let tA = 0;  // Progress for transformation A
+let tB = 0;  // Progress for transformation B
 let running = false;
 let animationId = null;
+let matrixBEnabled = false;
+let currentPhase = 'none'; // 'none', 'A', 'B'
 
 // Example transformations
 const examples = [
@@ -691,18 +798,62 @@ function loadExample(index) {
   a21.value = ex.matrix[1][0];
   a22.value = ex.matrix[1][1];
   
-  // Reset animation
-  t = 0;
+  resetAnimation();
+  draw();
+}
+
+function resetAnimation() {
+  tA = 0;
+  tB = 0;
   scrubber.value = 0;
   tValue.textContent = '0%';
   running = false;
+  currentPhase = 'none';
   if(animationId) {
     cancelAnimationFrame(animationId);
     animationId = null;
   }
-  
-  draw();
+  updateUI();
 }
+
+function updateUI() {
+  const phaseIndicator = document.getElementById('phaseIndicator');
+  const phaseBControls = document.getElementById('phaseBControls');
+  const sliderLabel = document.getElementById('sliderLabel');
+  
+  if(currentPhase === 'A') {
+    phaseIndicator.style.display = 'block';
+    phaseIndicator.className = 'phase-indicator';
+    phaseIndicator.textContent = 'Phase A: Transformation wird angewendet';
+    sliderLabel.textContent = 'Fortschritt A';
+    
+    if(matrixBEnabled) {
+      phaseBControls.style.display = tA >= 1 ? 'grid' : 'none';
+    } else {
+      phaseBControls.style.display = 'none';
+    }
+  } else if(currentPhase === 'B') {
+    phaseIndicator.style.display = 'block';
+    phaseIndicator.className = 'phase-indicator phase-b';
+    phaseIndicator.textContent = 'Phase B: Zweite Transformation wird angewendet';
+    sliderLabel.textContent = 'Fortschritt B';
+    phaseBControls.style.display = 'grid';
+  } else {
+    phaseIndicator.style.display = 'none';
+    sliderLabel.textContent = 'Fortschritt A';
+    phaseBControls.style.display = 'none';
+  }
+}
+
+// Matrix B toggle
+enableMatrixB.onchange = e => {
+  matrixBEnabled = e.target.checked;
+  document.getElementById('matrixBContent').style.display = matrixBEnabled ? 'block' : 'none';
+  document.getElementById('detInfoB').style.display = matrixBEnabled ? 'block' : 'none';
+  document.getElementById('detInfoComposition').style.display = matrixBEnabled ? 'block' : 'none';
+  resetAnimation();
+  draw();
+};
 
 // Theme toggle
 darkToggle.onchange = e => {
@@ -711,24 +862,22 @@ darkToggle.onchange = e => {
 
 // Scrubber
 scrubber.oninput = e => {
-  t = e.target.value / 100;
-  tValue.textContent = Math.round(t * 100) + '%';
+  const val = e.target.value / 100;
+  if(currentPhase === 'A') {
+    tA = val;
+  } else if(currentPhase === 'B') {
+    tB = val;
+  }
+  tValue.textContent = Math.round(val * 100) + '%';
   draw();
 };
 
 // All inputs trigger redraw and reset animation
-[a11, a12, a21, a22, vx, vy, showAxes, showTestVector, showDeterminant].forEach(el => {
+[a11, a12, a21, a22, b11, b12, b21, b22, vx, vy, showAxes, showTestVector, showDeterminant].forEach(el => {
   el.addEventListener('input', () => {
-    // Reset animation when matrix changes
-    if(el === a11 || el === a12 || el === a21 || el === a22) {
-      t = 0;
-      scrubber.value = 0;
-      tValue.textContent = '0%';
-      running = false;
-      if(animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-      }
+    if(el === a11 || el === a12 || el === a21 || el === a22 || 
+       el === b11 || el === b12 || el === b21 || el === b22) {
+      resetAnimation();
     }
     draw();
   });
@@ -740,6 +889,45 @@ function transform(M, v) {
     M[0][0]*v[0] + M[0][1]*v[1],
     M[1][0]*v[0] + M[1][1]*v[1]
   ];
+}
+
+function matrixMultiply(B, A) {
+  return [
+    [B[0][0]*A[0][0] + B[0][1]*A[1][0], B[0][0]*A[0][1] + B[0][1]*A[1][1]],
+    [B[1][0]*A[0][0] + B[1][1]*A[1][0], B[1][0]*A[0][1] + B[1][1]*A[1][1]]
+  ];
+}
+
+function matrixInverse(A) {
+  const det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  if(Math.abs(det) < 1e-10) {
+    return null;
+  }
+  return [
+    [A[1][1] / det, -A[0][1] / det],
+    [-A[1][0] / det, A[0][0] / det]
+  ];
+}
+
+function loadInverse() {
+  const A = [
+    [+a11.value, +a12.value],
+    [+a21.value, +a22.value]
+  ];
+  
+  const inv = matrixInverse(A);
+  if(!inv) {
+    alert('Matrix A ist nicht invertierbar (Determinante = 0)');
+    return;
+  }
+  
+  b11.value = inv[0][0].toFixed(4);
+  b12.value = inv[0][1].toFixed(4);
+  b21.value = inv[1][0].toFixed(4);
+  b22.value = inv[1][1].toFixed(4);
+  
+  resetAnimation();
+  draw();
 }
 
 function arrow(x1, y1, x2, y2, color, width) {
@@ -826,7 +1014,6 @@ function drawAxes() {
 }
 
 function drawDeterminantVisualization(M) {
-  // Draw parallelogram formed by basis vectors
   const e1 = transform(M, [1, 0]);
   const e2 = transform(M, [0, 1]);
   
@@ -851,15 +1038,33 @@ function draw() {
     [+a11.value, +a12.value],
     [+a21.value, +a22.value]
   ];
-
-  const M = [
-    [1 + t*(A[0][0]-1), t*A[0][1]],
-    [t*A[1][0], 1 + t*(A[1][1]-1)]
+  
+  const B = [
+    [+b11.value, +b12.value],
+    [+b21.value, +b22.value]
   ];
+
+  // Calculate transformation matrix based on phase
+  let M;
+  
+  if(!matrixBEnabled || currentPhase === 'none' || currentPhase === 'A') {
+    // Only apply A
+    M = [
+      [1 + tA*(A[0][0]-1), tA*A[0][1]],
+      [tA*A[1][0], 1 + tA*(A[1][1]-1)]
+    ];
+  } else if(currentPhase === 'B') {
+    // A is fully applied, now apply B
+    const MA = A; // A is fully applied (tA = 1)
+    const MB = [
+      [1 + tB*(B[0][0]-1), tB*B[0][1]],
+      [tB*B[1][0], 1 + tB*(B[1][1]-1)]
+    ];
+    M = matrixMultiply(MB, MA);
+  }
 
   if(showAxes.checked) drawAxes();
   
-  // Draw determinant visualization if enabled
   if(showDeterminant.checked) {
     drawDeterminantVisualization(M);
   }
@@ -877,7 +1082,7 @@ function draw() {
         center + e2[0]*scale, center - e2[1]*scale, 
         "#10b981", 3);
 
-  // Test vector - only if checkbox is checked
+  // Test vector
   if(showTestVector.checked) {
     const v = [+vx.value, +vy.value];
     const vImg = transform(M, v);
@@ -893,35 +1098,84 @@ function draw() {
     vectorInfo.textContent = 'Testvektor ausgeblendet';
   }
   
-  // Calculate and display determinant
-  const det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
-  detInfo.textContent = `det(A) = ${det.toFixed(2)}`;
+  // Calculate and display determinants
+  const detA = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  detInfo.textContent = `det(A) = ${detA.toFixed(2)}`;
+  
+  if(matrixBEnabled) {
+    const detB = B[0][0] * B[1][1] - B[0][1] * B[1][0];
+    detInfoB.textContent = `det(B) = ${detB.toFixed(2)}`;
+    
+    const composition = matrixMultiply(B, A);
+    const detComp = composition[0][0] * composition[1][1] - composition[0][1] * composition[1][0];
+    detInfoComposition.textContent = `det(B∘A) = ${detComp.toFixed(2)}`;
+  }
 }
 
-function loop() {
+function loopA() {
   if(!running) return;
-  t = Math.min(t + 0.01, 1);
-  scrubber.value = t * 100;
-  tValue.textContent = Math.round(t * 100) + '%';
+  tA = Math.min(tA + 0.01, 1);
+  scrubber.value = tA * 100;
+  tValue.textContent = Math.round(tA * 100) + '%';
   draw();
-  if(t < 1) {
-    animationId = requestAnimationFrame(loop);
+  
+  if(tA < 1) {
+    animationId = requestAnimationFrame(loopA);
+  } else {
+    running = false;
+    animationId = null;
+    updateUI();
+  }
+}
+
+function loopB() {
+  if(!running) return;
+  tB = Math.min(tB + 0.01, 1);
+  scrubber.value = tB * 100;
+  tValue.textContent = Math.round(tB * 100) + '%';
+  draw();
+  
+  if(tB < 1) {
+    animationId = requestAnimationFrame(loopB);
   } else {
     running = false;
     animationId = null;
   }
 }
 
-function startAnimation() {
+function startAnimationA() {
   if(animationId) {
     cancelAnimationFrame(animationId);
   }
   running = false;
-  t = 0;
+  tA = 0;
+  tB = 0;
   scrubber.value = 0;
   tValue.textContent = '0%';
+  currentPhase = 'A';
   running = true;
-  loop();
+  updateUI();
+  loopA();
+}
+
+function startAnimationB() {
+  if(!matrixBEnabled) return;
+  if(tA < 1) {
+    alert('Bitte starte zuerst die Animation für Matrix A!');
+    return;
+  }
+  
+  if(animationId) {
+    cancelAnimationFrame(animationId);
+  }
+  running = false;
+  tB = 0;
+  scrubber.value = 0;
+  tValue.textContent = '0%';
+  currentPhase = 'B';
+  running = true;
+  updateUI();
+  loopB();
 }
 
 function pause() { 
@@ -938,20 +1192,28 @@ function resetAll() {
     cancelAnimationFrame(animationId);
     animationId = null;
   }
-  t = 0;
+  tA = 0;
+  tB = 0;
   scrubber.value = 0;
   tValue.textContent = '0%';
+  currentPhase = 'none';
   a11.value = 1;
   a12.value = 0;
   a21.value = 0;
   a22.value = 1;
+  b11.value = 1;
+  b12.value = 0;
+  b21.value = 0;
+  b22.value = 1;
   vx.value = 2;
   vy.value = 1;
+  updateUI();
   draw();
 }
 
 // Initial setup
 renderExamples();
+updateUI();
 draw();
 </script>
 
